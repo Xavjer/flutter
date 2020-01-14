@@ -546,8 +546,25 @@ class FlutterDriverExtension {
     final GetText getTextCommand = command as GetText;
     final Finder target = await _waitForElement(_createFinder(getTextCommand.finder));
     // TODO(yjbanov): support more ways to read text
-    final Text text = target.evaluate().single.widget as Text;
-    return GetTextResult(text.data);
+    Widget widget = target.evaluate().single.widget;
+    switch (widget.runtimeType) {
+      case RichText:
+        Widget richText = widget as RichText;
+        if (richText.text.runtimeType == TextSpan)
+          return GetTextResult((().text as TextSpan).text);
+      case TextSpan:
+        return GetTextResult((widget as TextSpan).text);
+      case EditableText:
+        return GetTextResult((widget as EditableText).controller.text);
+      case TextField:
+        return GetTextResult((widget as TextField).controller.text);
+      case TextFormField:
+        return GetTextResult((widget as TextFormField).controller.text);
+      default:
+        return GetTextResult((widget as Text).data);
+    }
+
+    return GetTextResult((widget as Text).data);
   }
 
   Future<SetTextEntryEmulationResult> _setTextEntryEmulation(Command command) async {
