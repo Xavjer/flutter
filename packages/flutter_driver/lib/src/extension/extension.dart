@@ -549,9 +549,10 @@ class FlutterDriverExtension {
     Widget widget = target.evaluate().single.widget;
     switch (widget.runtimeType) {
       case RichText:
-        Widget richText = widget as RichText;
+        RichText richText = widget as RichText;
         if (richText.text.runtimeType == TextSpan)
-          return GetTextResult((().text as TextSpan).text);
+          return GetTextResult((richText.text as TextSpan).text);
+        break;
       case TextSpan:
         return GetTextResult((widget as TextSpan).text);
       case EditableText:
